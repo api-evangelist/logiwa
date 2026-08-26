@@ -1,0 +1,124 @@
+generated: '2026-08-25'
+method: searched
+source: https://developer.logiwa.com/?id=5df0da39e6466c2eec992f3f
+docs: https://developer.logiwa.com/?id=5df0da39e6466c2eec992f3f
+name: Logiwa Integration API authentication
+description: >-
+  Logiwa authenticates the Integration API with an OAuth 2.0 Resource Owner Password Credentials
+  grant against a per-tenant token host, returning a bearer access token that is then sent on
+  every Integration API call. Credentials are not self-service: the docs state an API user must
+  be provisioned by Logiwa under a sales contract before any token can be issued.
+schemes:
+- key: logiwaBearer
+  type: http
+  scheme: bearer
+  in: header
+  description: >-
+    Bearer access token obtained from the tenant token endpoint. All Integration API requests
+    must carry it.
+  applied_to: All /en/api/IntegrationApi/* operations
+- key: logiwaPasswordGrant
+  type: oauth2
+  flow: password
+  token_url_pattern: https://{environment}api.logiwa.com/token
+  token_url_examples:
+  - https://appapi.logiwa.com/token
+  - https://wmsapi.logiwa.com/token
+  request_content_type: application/x-www-form-urlencoded
+  request_parameters:
+  - name: grant_type
+    value: password
+    required: true
+  - name: username
+    description: Logiwa API user name provisioned by Logiwa
+    required: true
+  - name: password
+    description: Logiwa API user password
+    required: true
+  response_fields:
+  - access_token
+  - token_type
+  - username
+  - expires_in
+  - .issued
+  - .expires
+  description: >-
+    Documented OAuth 2.0 password grant. The docs' sample response shows token_type "bearer" and
+    a .issued/.expires pair two weeks apart; the Getting Started page states access tokens
+    "generally" last two weeks and that clients must refresh before expiry.
+token_host_pattern: >-
+  The token host mirrors the tenant application host: [yourenvironment].logiwa.com pairs with
+  [yourenvironment]api.logiwa.com/token. Documented examples: wms.logiwa.com -> wmsapi.logiwa.com/token,
+  app.logiwa.com -> appapi.logiwa.com/token.
+oidc_discovery:
+  served: true
+  urls:
+  - https://appapi.logiwa.com/.well-known/openid-configuration
+  - https://wmsapi.logiwa.com/.well-known/openid-configuration
+  issuer: Ocelot
+  grant_types_supported: [authorization_code, client_credentials, refresh_token, implicit, 'urn:ietf:params:oauth:grant-type:device_code']
+  scopes_supported: [admin, openid, offline_access]
+  code_challenge_methods_supported: [plain, S256]
+  token_endpoint_auth_methods_supported: [client_secret_basic, client_secret_post]
+  note: >-
+    The gateway also publishes a full OIDC discovery document advertising authorization_code,
+    client_credentials, refresh_token, implicit and device_code grants at /connect/*. None of
+    those flows are described anywhere in the public developer documentation, which documents
+    only the password grant against /token. Recorded as observed gateway capability, not as a
+    documented integration path.
+findings:
+- id: oidc-endpoints-advertise-http
+  severity: high
+  detail: >-
+    Every endpoint in the served OIDC discovery document uses the http:// scheme
+    (http://appapi.logiwa.com/connect/token, .../authorize, .../introspect, .../userinfo), not
+    https://. A client that follows discovery literally would negotiate tokens in cleartext.
+  evidence: well-known/logiwa-appapi-openid-configuration.json
+- id: oidc-issuer-not-a-url
+  severity: medium
+  detail: >-
+    issuer is the literal string "Ocelot" (the .NET API gateway product name) rather than an
+    https URL, which fails the OpenID Connect Discovery 1.0 requirement that issuer be a
+    URL using the https scheme. Issuer validation in a conformant OIDC client will reject it.
+  evidence: well-known/logiwa-appapi-openid-configuration.json
+- id: password-grant-only
+  severity: medium
+  detail: >-
+    The only documented flow is the OAuth 2.0 password grant, which OAuth 2.1 deprecates. It
+    requires the integrator to store a Logiwa user's username and password. There is no
+    documented API-key, client-credentials or per-integration credential path.
+  evidence: https://developer.logiwa.com/?id=5df0da39e6466c2eec992f3f
+- id: no-self-service-credentials
+  severity: medium
+  detail: >-
+    Getting Started states an integrator must contact a sales representative or customer success
+    manager, add API users to a sales contract, and wait for customer support to provision them.
+    No sign-up, sandbox key or trial credential is published.
+  evidence: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+authorization_model: >-
+  "The data this API user can access is based on the permissions given to them in Logiwa, such as
+  the Roles, Warehouses, and Clients they're affiliated with." Authorization is therefore carried
+  entirely by the provisioned user's role/warehouse/depositor affiliations, not by token scopes.
+errors:
+- condition: bad username or password
+  body: '{"error": "invalid_grant", "error_description": "The user name or password is incorrect."}'
+- condition: missing username
+  body: '{"expires_in":0,".error":"invalid_grant",".error_description":"Username cannot be empty."}'
+  observed: 'POST https://appapi.logiwa.com/token 2026-08-25, HTTP 200'
+- condition: expired or invalid bearer token
+  body: '{"Message": "Authorization has been denied for this request."}'
+  observed: 'POST https://app.logiwa.com/en/api/IntegrationApi/LookUp 2026-08-25, HTTP 401'
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://appapi.logiwa.com/token
+    method: POST
+    http_status: 200
+    note: Live; returned the documented invalid_grant envelope for an empty username.
+  - url: https://app.logiwa.com/en/api/IntegrationApi/LookUp
+    method: POST
+    http_status: 401
+    note: Live; returned the documented "Authorization has been denied for this request." envelope.
+  - url: https://appapi.logiwa.com/.well-known/openid-configuration
+    method: GET
+    http_status: 200

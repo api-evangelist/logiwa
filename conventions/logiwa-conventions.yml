@@ -1,0 +1,226 @@
+generated: '2026-08-25'
+method: searched
+source: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+docs: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+name: Logiwa Integration API conventions
+description: >-
+  Cross-cutting runtime semantics for the Logiwa Integration API, taken from the provider's own
+  Getting Started page and per-endpoint reference. Logiwa is a deliberately non-RESTful,
+  RPC-over-POST API: every operation is a POST to /en/api/IntegrationApi/{MethodName}, there are
+  no path or query parameters, and the API does not use HTTP status codes to convey outcome.
+style:
+  interface: RPC-over-HTTP
+  transport: HTTPS
+  http_methods_used: [POST]
+  path_pattern: /en/api/IntegrationApi/{MethodName}
+  host_pattern: https://{environment}.logiwa.com
+  host_examples: [app.logiwa.com, wms.logiwa.com]
+  note: >-
+    "Logiwa API doesn't use any query or path type of parameters; all the filters must be sent
+    as Content-Type: application/JSON." Every documented operation, including reads and searches,
+    is a POST.
+content_types:
+  request: application/json
+  auth_request: application/x-www-form-urlencoded
+  note: >-
+    "Logiwa's APIs expect the content type of API requests to be Content-Type: application/JSON.
+    Only the token method expects the content type of application/x-www-form-urlencoded."
+authentication:
+  style: oauth2-password-grant-bearer-token
+  detail: authentication/logiwa-authentication.yml
+error_envelope:
+  uses_http_status_codes: false
+  statement: >-
+    "Unlike standard REST APIs, Logiwa API does not use HTTP status codes."
+  success_shape: '{"Success": true, ...}'
+  failure_shape: '{"Success": false, "Errors": ["Error Message."]}'
+  detail: errors/logiwa-error-codes.yml
+  agent_impact: >-
+    An agent cannot branch on the HTTP status line. It must parse the JSON body and read the
+    Success boolean on every single call, including calls that returned HTTP 200.
+pagination:
+  style: page-number
+  request_parameters:
+  - name: PageSize
+    default: 200
+    max: 200
+    location: JSON body
+  - name: SelectedPageIndex
+    default: 1
+    max: null
+    location: JSON body
+    note: >-
+      Values start at 1. The system treats 0 the same as 1 and returns identical results, so 0
+      should not be used.
+  response_fields: [PageSize, SelectedPageIndex, PageCount, RecordCount]
+  applies_to: All search and report operations.
+  optional: true
+filtering:
+  style: json-body-filters
+  note: >-
+    Filters mirror the UI filters and are always sent in the JSON request body. Date-bounded
+    filters follow a LastModifiedDate_Start / LastModifiedDate_End pair convention.
+static_data:
+  operation: LookUp
+  path: /en/api/IntegrationApi/LookUp
+  note: >-
+    A single endpoint returns more than 25 types of static reference data (depositors, warehouses,
+    carriers, item types, order statuses, location groups and zones) as Id/Description pairs. An
+    empty body returns every list. Data is reflected 5 minutes after the underlying transaction.
+  lookup_types: 28
+date_format:
+  format: MM.DD.YYYY hh:mm:ss
+  example: 01.22.2019 06:01:02
+  timezone: Pacific Time (PST or PDT depending on Daylight Saving Time)
+  note: >-
+    Non-ISO-8601 and pinned to a single US timezone regardless of where the warehouse or the
+    caller is. Webhook payloads, however, use ISO-8601-like values (2023-03-30T01:55:55), so the
+    two surfaces disagree on date format.
+versioning:
+  scheme: none-published
+  note: >-
+    No version segment appears in the path, no version header is documented, and no version
+    identifier is published anywhere in the developer reference. Changes reach every caller at
+    once.
+idempotency:
+  supported: false
+  header: null
+  note: >-
+    NOT DOCUMENTED. There is no Idempotency-Key header, no client-supplied request token, and no
+    documented replay-safety guarantee anywhere in the Logiwa developer reference. Because every
+    operation including reads is a POST, a client that retries after a timeout has no published
+    way to know whether the first attempt landed. The documented mitigation for the adjacent
+    problem (duplicate creation) is external: callers are told to reconcile by polling with the
+    search endpoints. No Idempotency pointer is claimed in apis.yml, because the provider does
+    not publish the capability.
+dry_run_mode:
+  supported: false
+  note: No test/preview/validate-only mode is documented for any write operation.
+batching:
+  supported: true
+  note: >-
+    Most operations accept a collection body ("Is Method Body a Collection? YES"). Collection
+    size is capped at 50 for the bulk insert endpoints and line counts are capped per operation.
+  detail: rate-limits/logiwa-rate-limits.yml
+rate_limit_signaling:
+  headers: none
+  status_on_exhaustion: 403
+  detail: rate-limits/logiwa-rate-limits.yml
+request_id_tracing:
+  supported: false
+  note: >-
+    No request-id or correlation-id header is documented. The docs state that "sometimes, you may
+    see error log IDs instead of a clear error message" and instruct the caller to contact
+    customer support with them — so an opaque server-side log id is the only tracing handle, and
+    it only appears on failure.
+expansion:
+  style: boolean-include-flags
+  note: >-
+    Related data is pulled in with explicit boolean flags on the request body rather than an
+    expand parameter — e.g. IsGetCustomerAddressInfo and IsGetOrderDetails on List Shipment Orders.
+reversibility:
+  grade: verified
+  summary: >-
+    Logiwa is a write-heavy operational API and it does publish reversal paths for its major
+    write surfaces. Two of them state the window explicitly in the endpoint description; the
+    delete-style reversals state no window at all. Nothing here is inferred — every window below
+    is quoted from the provider's own endpoint documentation.
+  read_only: false
+  surfaces:
+  - write_operation: InsertShipmentOrder / InsertShipmentOrderWithBulkResult
+    reversal_operation: CancelShipmentOrder
+    reversal_path: /en/api/IntegrationApi/CancelShipmentOrder
+    window_stated: true
+    window: >-
+      "If the order has started to be picked up or packed, the users will be notified of the
+      packing or shipping processes." Cancellation is therefore bounded by the start of picking
+      or packing, and the caller is told when it is past that boundary.
+    grade: documented
+    docs: https://developer.logiwa.com/?id=5e18596ce6466c20381289c3
+  - write_operation: WarehouseReceiptBulkInsert (Insert Receipt Order)
+    reversal_operation: UpdateReceiptOrderStatus
+    reversal_path: /en/api/IntegrationApi/UpdateReceiptOrderStatus
+    window_stated: true
+    window: >-
+      "the users can update the status of Receipt Orders that have not already Started or
+      Completed." The reversal window closes the moment the receipt order starts.
+    grade: verified
+    docs: https://developer.logiwa.com/?id=64c8c1ade6466c4244b5e260
+  - write_operation: WarehouseOrderDetailInsert
+    reversal_operation: WarehouseOrderDetailDelete
+    reversal_path: /en/api/IntegrationApi/WarehouseOrderDetailDelete
+    window_stated: false
+    window: null
+    grade: documented
+    docs: https://developer.logiwa.com/?id=5e207ad8e6466c2ca0a6b5c9
+  - write_operation: InventoryItemBarcodeInsert
+    reversal_operation: InventoryItemBarcodeDelete
+    reversal_path: /en/api/IntegrationApi/InventoryItemBarcodeDelete
+    window_stated: false
+    window: null
+    grade: documented
+    docs: https://developer.logiwa.com/?id=64217b10e6466c3514e466bd
+  - write_operation: InventoryItemComponentInsert
+    reversal_operation: InventoryItemComponentDelete
+    reversal_path: /en/api/IntegrationApi/InventoryItemComponentDelete
+    window_stated: false
+    window: null
+    grade: documented
+    docs: https://developer.logiwa.com/?id=62548c46e6466c09cc465139
+  - write_operation: InventoryItemItemChannelIDsInsert
+    reversal_operation: InventoryItemItemChannelIDsDelete
+    reversal_path: /en/api/IntegrationApi/InventoryItemItemChannelIDsDelete
+    window_stated: false
+    window: null
+    grade: documented
+    docs: https://developer.logiwa.com/?id=5e1797b8e6466c2370947a23
+  - write_operation: InventoryAdjustment
+    reversal_operation: InventoryAdjustment (compensating adjustment)
+    reversal_path: /en/api/IntegrationApi/InventoryAdjustment
+    window_stated: false
+    window: null
+    grade: documented
+    note: >-
+      There is no undo. A stock adjustment is reversed by posting a compensating adjustment,
+      which is a new transaction in the ledger rather than a rollback.
+  irreversible_or_absent:
+  - operation: ShipShipmentOrder
+    note: >-
+      No un-ship, void-shipment or reverse-shipment operation is documented. Once an order is
+      shipped through the API there is no published API path back.
+  - operation: PickToPackWithTrackingNumber / PickToPackWithTrackingNo
+    note: No documented reversal.
+  - operation: GenerateLabelForPrintAndApply
+    note: >-
+      No documented label-void operation. The docs separately state that creating carrier labels
+      is not available through the API at all.
+  - operation: ReceiveReceiptOrder / ReceiveReceiptOrderAsync
+    note: >-
+      No documented un-receive operation. UpdateReceiptOrderStatus explicitly excludes receipt
+      orders that have already Started or Completed, so receiving is a one-way door.
+unavailable_via_api:
+  note: >-
+    Logiwa publishes an explicit list of operations that are deliberately NOT exposed through the
+    API. This is unusually honest and is load-bearing for an agent planning a workflow.
+  operations:
+  - Creating carrier labels
+  - Allocation (allocating orders to specific inventory)
+  - Task creation (picking or packing tasks)
+  - Packing (completing the packing process)
+  - Job creation (creating job lists)
+  - Transfer (transferring items, pallets and orders)
+  - Picking (completing the picking process)
+cross_links:
+  errors: errors/logiwa-error-codes.yml
+  lifecycle: lifecycle/logiwa-lifecycle.yml
+  authentication: authentication/logiwa-authentication.yml
+  rate_limits: rate-limits/logiwa-rate-limits.yml
+  webhooks: asyncapi/logiwa-webhooks.yml
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+    http_status: 200
+  - url: https://app.logiwa.com/en/api/IntegrationApi/LookUp
+    http_status: 401
+    note: Confirms the documented path pattern and error envelope are live.

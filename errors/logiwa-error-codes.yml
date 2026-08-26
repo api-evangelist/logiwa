@@ -1,0 +1,134 @@
+generated: '2026-08-25'
+method: searched
+source: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+docs: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+name: Logiwa Integration API error catalog
+description: >-
+  Logiwa deliberately does not use HTTP status codes to signal outcome on its Integration API.
+  Errors arrive in a JSON envelope with a Success boolean and a flat Errors array of human-readable
+  strings. There is no error code registry, no machine-stable identifier, and no RFC 9457 problem
+  document. This catalog records the envelope and every error condition the provider documents.
+format: proprietary-envelope
+rfc9457: false
+rfc7807: false
+problem_json_content_type_used: false
+envelope:
+  success:
+    shape: '{"Success": true, ...}'
+  failure:
+    shape: '{"Success": false, "Errors": ["Error Message."]}'
+    fields:
+    - name: Success
+      type: boolean
+      note: false on failure. Must be read on every response, including HTTP 200.
+    - name: Errors
+      type: array of string
+      note: >-
+        Free-text human-readable messages. No code, no type URI, no field pointer, no
+        machine-stable identifier. Not enumerable.
+  statement: >-
+    "Unlike standard REST APIs, Logiwa API does not use HTTP status codes. When you get a
+    successful response, you'll see 'Success': true. When you get an unsuccessful response,
+    you'll see 'Success': false, 'Errors': ['Error Message.']"
+error_code_registry:
+  published: false
+  note: >-
+    No enumerated error code list exists anywhere in the Logiwa developer reference. The docs
+    additionally state: "Sometimes, you may see error log IDs instead of a clear error message.
+    Contact customer support for these errors." An opaque server-side log id with no lookup
+    endpoint is therefore a documented terminal state for an integrator.
+problem_types:
+- id: authorization-denied
+  http_status: 401
+  envelope: '{"Message": "Authorization has been denied for this request."}'
+  cause: Bearer access token is missing, malformed or expired.
+  remediation: >-
+    Request a new access token from https://{environment}api.logiwa.com/token using the password
+    grant. Tokens expire; the docs say generally two weeks.
+  surface: All /en/api/IntegrationApi/* operations
+  observed: 'POST https://app.logiwa.com/en/api/IntegrationApi/LookUp 2026-08-25 -> HTTP 401'
+  note: >-
+    One of only two places Logiwa does use an HTTP status code, and it uses a different envelope
+    key (Message) than the business-error envelope (Success/Errors).
+- id: invalid-grant
+  http_status: 200
+  envelope: '{"error": "invalid_grant", "error_description": "The user name or password is incorrect."}'
+  cause: Wrong username or password on the token request.
+  remediation: Correct the credentials. Credentials are provisioned by Logiwa support, not self-service.
+  surface: POST /token
+  note: >-
+    Returned with HTTP 200, not 400 as RFC 6749 section 5.2 requires for invalid_grant. A client
+    that trusts the status line will treat a failed authentication as a success.
+- id: invalid-grant-empty-username
+  http_status: 200
+  envelope: '{"expires_in":0,".error":"invalid_grant",".error_description":"Username cannot be empty."}'
+  cause: Empty username submitted to the token endpoint.
+  remediation: Supply the provisioned Logiwa API username.
+  surface: POST /token
+  observed: 'POST https://appapi.logiwa.com/token 2026-08-25 -> HTTP 200'
+  note: >-
+    Note the leading-dot field names (".error", ".error_description") rather than the RFC 6749
+    "error"/"error_description" keys used in the docs sample. The two documented token-error
+    shapes are not the same shape.
+- id: rate-limit-throttled
+  http_status: 403
+  envelope: >-
+    Request has been throttled (blocked) because of the request limit per second. Please retry
+    after {t} milliseconds later.
+  cause: The API user exceeded the request limit for its user type (Standard/Enterprise/Premium).
+  remediation: >-
+    Back off for the {t} milliseconds named inside the message text and retry. There is no
+    Retry-After header and no RateLimit-* headers; the delay must be parsed out of prose.
+  surface: All operations
+  detail: rate-limits/logiwa-rate-limits.yml
+  note: >-
+    403 Forbidden is used for throttling rather than 429 Too Many Requests, so generic HTTP
+    client middleware will classify quota exhaustion as an authorization failure.
+- id: business-validation-failure
+  http_status: 200
+  envelope: '{"Success": false, "Errors": ["<free text>"]}'
+  cause: >-
+    Any domain-level rejection — unknown warehouse or depositor id, batch over the 50-item
+    collection cap, line count over the per-operation limit, malformed date, order already
+    picked or packed, receipt order already Started or Completed.
+  remediation: >-
+    Read the Errors array. There is no code to switch on, so a client must string-match or
+    surface the message to a human.
+  surface: All /en/api/IntegrationApi/* operations
+- id: unparseable-log-id
+  http_status: 200
+  envelope: '{"Success": false, "Errors": ["<opaque log id>"]}'
+  cause: Server-side error where Logiwa returns an internal log identifier instead of a message.
+  remediation: Contact Logiwa customer support with the log id. There is no self-service lookup.
+  surface: All operations
+  published: true
+findings:
+- id: no-http-status-semantics
+  severity: high
+  detail: >-
+    Because outcome is carried only in the body, every response must be parsed and the Success
+    flag inspected. Standard HTTP-aware clients, retry middleware, load balancers and observability
+    tooling will read a failed Logiwa write as a 200 success.
+- id: no-error-code-registry
+  severity: high
+  detail: >-
+    Errors[] carries free text with no stable code. An integration cannot branch reliably on a
+    specific failure, cannot localise, and will break silently if Logiwa rewords a message.
+- id: three-incompatible-envelopes
+  severity: medium
+  detail: >-
+    The API uses at least three different error shapes — {Success, Errors[]} for business errors,
+    {Message} for auth denial, and {error, error_description} / {.error, .error_description} for
+    token errors — with no shared discriminator.
+- id: 403-for-throttling
+  severity: medium
+  detail: 403 is used where 429 is the standard, and the retry delay is embedded in prose.
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+    http_status: 200
+  - url: https://app.logiwa.com/en/api/IntegrationApi/LookUp
+    http_status: 401
+  - url: https://appapi.logiwa.com/token
+    http_status: 200

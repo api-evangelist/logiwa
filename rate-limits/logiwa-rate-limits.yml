@@ -1,0 +1,90 @@
+generated: '2026-08-25'
+method: searched
+source: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+docs: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+name: Logiwa Integration API rate limits
+description: >-
+  Logiwa publishes explicit, numeric per-second and per-minute request limits tiered by API user
+  type on the Getting Started page, together with the status code and message returned on
+  exhaustion, and separate batch collection-size and line-count caps per endpoint.
+limit_count: 3
+limits:
+- id: standard-api-user
+  scope: per-api-user
+  tier: Standard
+  window: 1s
+  limit: 1
+  note: 1 request allowed per 1 second.
+- id: standard-api-user-minute
+  scope: per-api-user
+  tier: Standard
+  window: 60s
+  limit: 60
+  note: 60 requests per minute request limit.
+- id: enterprise-api-user
+  scope: per-api-user
+  tier: Enterprise
+  window: 113ms
+  limit: 1
+  note: 1 request allowed every 113 milliseconds.
+- id: enterprise-api-user-minute
+  scope: per-api-user
+  tier: Enterprise
+  window: 60s
+  limit: 530
+  note: 530 requests per minute request limit.
+- id: premium-api-user
+  scope: per-api-user
+  tier: Premium
+  window: 50ms
+  limit: 1
+  note: 1 request allowed every 50 milliseconds.
+- id: premium-api-user-minute
+  scope: per-api-user
+  tier: Premium
+  window: 60s
+  limit: 1200
+  note: 1200 requests per minute request limit.
+exhaustion:
+  status_code: 403
+  message: >-
+    Request has been throttled (blocked) because of the request limit per second. Please retry
+    after {t} milliseconds later.
+  retry_hint: >-
+    The retry delay is embedded in the error message text as {t} milliseconds. It is NOT returned
+    as a Retry-After header.
+response_headers:
+  published: false
+  note: >-
+    Logiwa publishes NO rate-limit response headers. There is no X-RateLimit-*, no RateLimit-*
+    and no Retry-After documented anywhere in the developer reference, and the docs state plainly
+    that "Logiwa API does not use HTTP status codes" for its own error semantics. An agent cannot
+    read remaining quota or a reset time from a response; it can only parse the {t} value out of
+    the 403 message body prose. This is the single largest runtime-signal gap in the API.
+batch_limits:
+  collection_size:
+    limit: 50
+    applies_to: [PurchaseOrderBulkInsert, InsertShipmentOrder, InsertInventoryItem, WarehouseReceiptBulkInsert]
+    note: Users can create 50 orders/items with a single call.
+  line_limits:
+  - operation: InsertShipmentOrder
+    lines: 400
+  - operation: InsertShipmentOrderWithBulkResult
+    lines: 240
+  - operation: PurchaseOrderBulkInsert
+    lines: 4000
+  - operation: WarehouseReceiptBulkInsert
+    lines: 4000
+  - operation: ReceiveReceiptOrder
+    lines: 1500
+guidance_published:
+- Understand the rate limits in place for each endpoint or action.
+- Implement client-side throttling to control request frequency and volume.
+- Implement a backoff and retry mechanism rather than retrying continuously.
+- Batch requests or use bulk operations to minimise call count.
+- Use webhooks instead of frequent polling.
+- Handle rate-limiting errors explicitly with informative messages.
+x-evidence:
+  fetched: '2026-08-25'
+  url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+  http_status: 200

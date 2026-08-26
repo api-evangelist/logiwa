@@ -1,0 +1,243 @@
+generated: '2026-08-25'
+method: derived
+source: >-
+  Derived from the 81 operations and their documented request/response payloads at
+  https://developer.logiwa.com/, and from the eleven webhook payload shapes.
+name: Logiwa Integration API data model
+description: >-
+  Entity graph for the Logiwa warehouse management domain, reconstructed from the operation set
+  and the documented payload fields. Logiwa uses proprietary integer surrogate keys prefixed
+  Logiwa* on the event surface (LogiwaOrderId, LogiwaInventoryItemId, LogiwaReceiptOrderId) and
+  bare Id/Description pairs on the LookUp reference surface. There is no published schema
+  document, so field lists here are those actually observed in the provider's example payloads.
+key_style:
+  type: integer surrogate keys
+  prefixes: false
+  note: >-
+    No prefixed string ids (no "so_", "itm_"). Ids are bare integers, which means an id alone
+    does not identify its entity type — an agent must track type out of band.
+tenancy:
+  dimensions: [Warehouse, Client (also called Depositor)]
+  note: >-
+    Nearly every entity and every webhook payload is scoped by both WarehouseId and Client /
+    Depositor. This is the multi-tenant 3PL model: one Logiwa account serves many client brands
+    across many warehouses, and API user permissions are bound to specific Roles, Warehouses and
+    Clients.
+entities:
+- name: InventoryItem
+  aka: [Product, Item]
+  primary_key: LogiwaInventoryItemId
+  business_key: LogiwaInventoryItemCode
+  operations: [InventoryItemSearch, InsertInventoryItem, InventoryItemGetID, InventoryItemPackTypeGet, InventoryItemPackTypeSearch]
+  relationships:
+  - type: has_many
+    target: ItemBarcode
+    via: InventoryItemId
+  - type: has_many
+    target: ItemComponent
+    via: InventoryItemId
+    note: Kit / bill-of-materials composition.
+  - type: has_many
+    target: ItemChannelListing
+    via: InventoryItemId
+  - type: has_many
+    target: InventoryStock
+    via: InventoryItemId
+  - type: belongs_to
+    target: Client
+    via: ClientId
+- name: ItemBarcode
+  operations: [InventoryItemBarcodeSearch, InventoryItemBarcodeInsert, InventoryItemBarcodeUpdate, InventoryItemBarcodeDelete]
+  relationships:
+  - type: belongs_to
+    target: InventoryItem
+- name: ItemComponent
+  aka: [Kit component]
+  operations: [InventoryItemComponentSearch, InventoryItemComponentInsert, InventoryItemComponentDelete]
+  relationships:
+  - type: belongs_to
+    target: InventoryItem
+    note: Self-referential — a kit InventoryItem is composed of component InventoryItems.
+- name: ItemChannelListing
+  operations: [InventoryItemItemChannelIDsSearch, InventoryItemItemChannelIDsInsert, InventoryItemItemChannelIDsUpdate, InventoryItemItemChannelIDsDelete]
+  relationships:
+  - type: belongs_to
+    target: InventoryItem
+  - type: belongs_to
+    target: Channel
+    via: ChannelId
+  note: Maps a Logiwa product to its identifier on an external sales channel or marketplace.
+- name: ShipmentOrder
+  aka: [Warehouse Order, SO]
+  primary_key: LogiwaOrderId
+  business_key: LogiwaOrderNumber
+  external_key: CustomerOrderNumber
+  operations: [WarehouseOrderSearch, InsertShipmentOrder, InsertShipmentOrderWithBulkResult, WarehouseOrderUpdate, CancelShipmentOrder, WarehouseOrderGetID, WarehouseOrderStatusReportSearch, ShipShipmentOrder, GenerateLabelForPrintAndApply]
+  relationships:
+  - type: has_many
+    target: ShipmentOrderDetail
+    via: LogiwaOrderId
+  - type: belongs_to
+    target: Warehouse
+    via: WarehouseId
+  - type: belongs_to
+    target: Client
+    via: ClientId
+  - type: has_many
+    target: ShipmentInfo
+    via: LogiwaOrderId
+  - type: has_many
+    target: Document
+    via: OrderId
+  - type: has_many
+    target: Serial
+    via: LogiwaOrderId
+  status_vocabulary_source: LookUp -> ShipmentOrderStatusList
+  observed_statuses: [Entered]
+- name: ShipmentOrderDetail
+  aka: [SO Detail, order line]
+  operations: [WarehouseOrderDetailSearch, WarehouseOrderDetailInsert, WarehouseOrderDetailUpdate, WarehouseOrderDetailDelete, WarehouseOrderDetailGetID, WarehouseOrderDetailKitSearch]
+  relationships:
+  - type: belongs_to
+    target: ShipmentOrder
+  - type: belongs_to
+    target: InventoryItem
+  quantity_fields: [planned, allocated, picked, sorted, packed, canceled]
+- name: ShipmentInfo
+  aka: [Shipment, parcel]
+  operations: [ShipmentReportAllSearch, ShipmentReportSerialSearch, WarehouseOrderShipmentInfoSearch, ShipmentOrderCarrierInfoSearch]
+  relationships:
+  - type: belongs_to
+    target: ShipmentOrder
+  - type: belongs_to
+    target: Carrier
+    via: CarrierId
+  fields: [CarrierTrackingNumber, CanceledTrackingNumber, CarrierRate, Carrier, ShipmentDate, PackQuantity]
+- name: PurchaseOrder
+  aka: [PO]
+  primary_key: LogiwaPurchaseOrderId
+  business_key: LogiwaPurchaseOrderNumber
+  operations: [PurchaseOrderSearch, PurchaseOrderBulkInsert, PurchaseOrderUpdate, PurchaseOrderGetID]
+  relationships:
+  - type: belongs_to
+    target: Warehouse
+  - type: belongs_to
+    target: Client
+  - type: has_many
+    target: PurchaseOrderDetail
+  status_vocabulary_source: LookUp -> PurchaseOrderTypeList
+  observed_statuses: [Entered]
+- name: ReceiptOrder
+  aka: [Warehouse Receipt, RO]
+  primary_key: LogiwaReceiptOrderId
+  business_key: LogiwaReceiptOrderNumber
+  operations: [WarehouseReceiptSearch, WarehouseReceiptBulkInsert, UpdateWarehouseReceipt, WarehouseReceiptDetailUpdate, WarehouseReceiptGetID, UpdateReceiptOrderStatus, ReceiveReceiptOrder, ReceiveReceiptOrderAsync, PutAwaySuggestion]
+  relationships:
+  - type: has_many
+    target: ReceiptOrderDetail
+  - type: has_many
+    target: Receipt
+    via: ReceiptId
+  - type: belongs_to
+    target: Warehouse
+  - type: belongs_to
+    target: Client
+  observed_statuses: [Completed, Started]
+- name: Receipt
+  operations: [ReceiptAllSearch, ReceiptReportSerialSearch, UpdateReceiptItem, ReceiptOrderSerialInsert]
+  relationships:
+  - type: belongs_to
+    target: ReceiptOrder
+  - type: belongs_to
+    target: Warehouse
+  fields: [ReceiptId, ReceiptItemId, ReceiptItemCode, ReceiptDateTime, WarehouseId, WarehouseDescription]
+- name: InventoryStock
+  aka: [Stock, Inventory]
+  operations: [ListingInventoryReport, StockDamagedUndamagedReportSearch, GetAvailableStockInfo, KitInventoryReport, AvailableToPromiseReportSearch, AvailableToPromiseSnapshot, GetInventorySnapshot, InventoryAdjustment, InventoryPropertyUpdate, InventoryPropertyBulkUpdate]
+  relationships:
+  - type: belongs_to
+    target: InventoryItem
+  - type: belongs_to
+    target: Location
+    via: LocationId
+  - type: belongs_to
+    target: Warehouse
+  fields: [TotalInventoryQuantity, AvailableQuantity]
+- name: Location
+  primary_key: LocationId
+  business_key: LocationCode
+  operations: [LocationSearch, LocationUpdate, StockPalletSearch]
+  relationships:
+  - type: belongs_to
+    target: Warehouse
+  - type: belongs_to
+    target: LocationGroup
+  - type: belongs_to
+    target: LocationZone
+  flags: [IsActive, IsLocked, IsDamagedLoc, IsPackingLoc, IsPickingLoc, IsReceivingLoc]
+- name: CountPlan
+  operations: [CreateCountPlan, CountPlanCompare, CountPlanLocationFrequency, CountTransactionSearch]
+  relationships:
+  - type: belongs_to
+    target: Warehouse
+  - type: has_many
+    target: Location
+  vocabulary_source: LookUp -> CountPlanType
+- name: Document
+  operations: [UploadDocument, DownloadDocument, ListOrderDocuments]
+  relationships:
+  - type: belongs_to
+    target: ShipmentOrder
+  vocabulary_source: LookUp -> DocumentTypeList
+  note: >-
+    The channel by which a carrier partner returns a generated label image and tracking number to
+    Logiwa, since label generation itself is explicitly outside the API.
+- name: TransactionHistory
+  aka: [Movement]
+  operations: [TransactionHistoryReportSearch]
+  fields: [TransactionId, TransactionHistoryStockId, MovementDate, MovementType, MovementSubType]
+  relationships:
+  - type: belongs_to
+    target: Warehouse
+  - type: belongs_to
+    target: Client
+- name: WarehouseTask
+  aka: [Jobs & Tasks]
+  operations: [WarehouseTaskProcessingSearch, ProductivityMetricsReport]
+  relationships:
+  - type: belongs_to
+    target: Warehouse
+  note: >-
+    Read-only through the API. Task creation, job creation, picking and packing completion are on
+    Logiwa's published list of operations NOT available via the API.
+- name: BillingRecord
+  operations: [WarehouseContractBillingReport]
+  relationships:
+  - type: belongs_to
+    target: Client
+  - type: belongs_to
+    target: Warehouse
+reference_entities:
+  source: LookUp
+  note: >-
+    28 reference lists are returned as Id/Description pairs by a single LookUp call. These are the
+    controlled vocabularies every other operation's foreign keys point at.
+  lists: [DepositorList, WarehouseList, InventorySiteList, ItemMainCategoryList, ShipmentOrderStatusList,
+    CarrierList, ChannelList, ItemTypeList, ItemStatusList, PartyAddressTypeList, CarrierAddressTypeList,
+    ShipmentMethodList, PurchaseOrderTypeList, ReceiptOrderTypeList, ShipmentOrderTypeList, DocumentTypeList,
+    DangerousItemTypeList, HazmatIdendificationNumberList, AdjustmentType, OrderCancelReason, QuarantineReason,
+    SuitabilityReason, OrderOperationStatus, CarrierConfirmationType, CountPlanType, CarrierPayorBillingType,
+    LocationGroupList, LocationZoneList]
+  freshness: Reflected 5 minutes after the underlying transaction.
+findings:
+- id: no-schema-document
+  severity: medium
+  detail: >-
+    No JSON Schema, OpenAPI components or object-reference page is published. Field lists exist
+    only as HTML tables and example payloads per endpoint, so no consumer can validate a payload
+    before sending it.
+- id: untyped-integer-ids
+  severity: low
+  detail: >-
+    Surrogate keys are bare integers with no type prefix, so ids are only meaningful alongside
+    the operation that produced them.

@@ -1,0 +1,137 @@
+generated: '2026-08-25'
+method: searched
+source: https://developer.logiwa.com/?id=633d97bae6466c1730066501
+docs: https://developer.logiwa.com/?id=633d97bae6466c1730066501
+name: Logiwa webhook event catalog
+description: >-
+  Logiwa publishes a documented webhook subscription surface with eleven event topics covering
+  order, receipt, purchase-order, inventory, location, movement and shipment-tracking changes.
+  Each topic is documented with the processes that trigger it and a full example JSON payload.
+  Logiwa publishes NO AsyncAPI document for this surface — the catalog below is the provider's
+  own reference, captured; nothing here is authored on Logiwa's behalf.
+asyncapi_published: false
+asyncapi_probed:
+- url: https://appapi.logiwa.com/asyncapi.yaml
+  status: 401
+- url: https://wmsapi.logiwa.com/asyncapi.yaml
+  status: 401
+- url: https://developer.logiwa.com/asyncapi.yaml
+  status: 404
+transport: HTTP callback (provider POSTs to a customer-configured Callback URL)
+configuration:
+  surface: Logiwa WMS UI, Webhook Setup page (not configurable via the API)
+  setup_docs: https://logiwa.my.site.com/logiwahelp/s/article/Webhook-Setup
+  fields:
+  - name: Callback URL
+    max_length: 1000
+  - name: Setup Name
+    max_length: 255
+  - name: Notification Email
+    max_length: 200
+  scoping: Events are unique per warehouse, client (depositor) and event type.
+delivery_guarantees:
+  at_least_once: false
+  guaranteed: false
+  ordered: false
+  published_limitations:
+  - >-
+    "Webhook delivery isn't always guaranteed. You should therefore implement reconciliation jobs
+    to fetch data from Logiwa periodically."
+  - >-
+    "Ordering isn't guaranteed between different topics for the same resource. For example, a
+    Status Update webhook might be delivered before a Movement webhook for order allocations."
+  - >-
+    "Events are unique for warehouse, client(depositor), and event type. If users add specific
+    event types to multiple setups where the warehouse and depositor are the same, Logiwa only
+    and always streams the event to the first designated callback." A given event cannot be
+    fanned out to two callback URLs.
+  signing:
+    published: false
+    note: >-
+      No webhook signature, shared secret, HMAC header or verification procedure is documented.
+      A receiver has no published way to verify that a callback came from Logiwa.
+  retry_policy:
+    published: false
+    note: No retry schedule, backoff or dead-letter behaviour is documented.
+event_count: 11
+events:
+- topic: SO Status Update
+  title: Shipment Order Status Update
+  trigger: Order Status Update
+  payload_fields: [ClientKey, LogiwaOrderId, LogiwaOrderNumber, CustomerOrderNumber, Depositor, WarehouseId, Warehouse, CurrentShipmentOrderStatus]
+  docs: https://developer.logiwa.com/?id=64141eb5e6466c4dc01efb2c
+- topic: RO Status Update
+  title: Receipt Order Status Update
+  trigger: Order Status Update
+  payload_fields: [ClientKey, LogiwaReceiptOrderId, LogiwaReceiptOrderNumber, Client, WarehouseId, Warehouse, CurrentReceiptOrderStatus, ReceiptOrderDate]
+  docs: https://developer.logiwa.com/?id=64142671e6466c4dc01efb2e
+- topic: PO Status Update
+  title: Purchase Order Status Update
+  trigger: Order Status Update
+  payload_fields: [ClientKey, LogiwaPurchaseOrderId, LogiwaPurchaseOrderNumber, Client, WarehouseId, Warehouse, CurrentPurchaseOrderStatus, PurchaseOrderDate]
+  docs: https://developer.logiwa.com/?id=64142839e6466c4dc01efb30
+- topic: Inventory Change
+  title: Inventory Change
+  trigger: Warehouse, client and item based total and allocatable stock amount change
+  payload_fields: [ClientKey, LogiwaInventoryItemId, LogiwaInventoryItemCode, Client, Warehouse, WarehouseId, TotalInventoryQuantity, AvailableQuantity]
+  docs: https://developer.logiwa.com/?id=64142d6de6466c4dc01efb32
+- topic: Location Update
+  title: Location Update
+  trigger: Location isLocked / pickingtype change
+  payload_fields: [ClientKey, LocationId, LocationCode, IsActive, IsLocked, IsDamagedLoc, IsPackingLoc, IsPickingLoc, IsReceivingLoc]
+  docs: https://developer.logiwa.com/?id=641431a0e6466c0a841acf3a
+- topic: Order Shipment Info
+  title: Order Shipment Info
+  trigger: Tracking shipments of order details separately
+  payload_fields: [ClientKey, OrderCode, CustomerOrderNumber, Client, WarehouseId, Warehouse, ShipmentDate, PackQuantity, CuQuantity]
+  docs: https://developer.logiwa.com/?id=64143543e6466c274899ecc1
+- topic: Shipment Tracking Info
+  title: Shipment Tracking Info
+  trigger: Carrier label creation and cancellation
+  payload_fields: [LogiwaOrderNumber, OrderCode, CustomerOrderNumber, CarrierTrackingNumber, CanceledTrackingNumber, CarrierRate, Carrier]
+  docs: https://developer.logiwa.com/?id=641439dce6466c274899ecc3
+- topic: Movement Info
+  title: Movement Info
+  trigger: A movement transaction occurs (receipt movement, stock change)
+  payload_fields: [ClientKey, TransactionId, TransactionHistoryStockId, Warehouse, Client, MovementDate, MovementType, MovementSubType]
+  docs: https://developer.logiwa.com/?id=64144148e6466c274899ecc5
+- topic: Receipt Info
+  title: Receipt Info
+  trigger: A new receipt item is created on the system
+  payload_fields: [ClientKey, ReceiptId, ReceiptItemId, ReceiptItemCode, ReceiptDateTime, WarehouseId, WarehouseDescription]
+  docs: https://developer.logiwa.com/?id=64144cd3e6466c1124e13929
+- topic: Order CON Shipment Info
+  title: Order Consolidated Shipment Info
+  trigger: Consolidated shipment detail tracking (packing station)
+  payload_fields: [ClientKey, LogiwaOrderId, LogiwaOrderNumber, CustomerOrderNumber, CustomerReferenceNumber, OrderDate, ClientId, Client]
+  docs: https://developer.logiwa.com/?id=6414523fe6466c1124e1392b
+- topic: SO Creation Info
+  title: Shipment Order Creation Info
+  trigger: Order creation (only by API)
+  payload_fields: [ClientKey, LogiwaOrderId, LogiwaOrderNumber, Client, Warehouse, WarehouseId, WarehouseOrderStatus, WarehouseOrderType]
+  docs: https://developer.logiwa.com/?id=65cb62e4e6466c188cc3fde8
+findings:
+- id: no-webhook-signature
+  severity: high
+  detail: >-
+    No signing secret, HMAC header or origin-verification mechanism is published. A receiver
+    cannot distinguish a genuine Logiwa callback from a forged POST.
+- id: delivery-not-guaranteed
+  severity: medium
+  detail: >-
+    Logiwa states delivery is not guaranteed and instructs integrators to run periodic
+    reconciliation polls, which partly defeats the rate-limit relief webhooks are meant to give.
+- id: single-callback-per-scope
+  severity: medium
+  detail: >-
+    Only the first configured callback for a given warehouse/depositor/event-type receives the
+    event, so two systems cannot both subscribe to the same scope.
+- id: no-asyncapi
+  severity: low
+  detail: >-
+    Eleven fully-documented topics with example payloads exist but no AsyncAPI document is
+    published, so the event surface is not machine-readable.
+x-evidence:
+  fetched: '2026-08-25'
+  url: https://developer.logiwa.com/?id=633d97bae6466c1730066501
+  http_status: 200

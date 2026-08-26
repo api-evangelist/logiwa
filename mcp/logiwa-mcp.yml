@@ -1,0 +1,89 @@
+generated: '2026-08-25'
+method: derived
+source: >-
+  Derived from the 81 operations published at https://developer.logiwa.com/. No Logiwa MCP server
+  exists — this is a CANDIDATE tool surface, not a shipped product.
+name: Logiwa MCP server
+status: candidate
+description: >-
+  Logiwa ships no MCP server. Searched the Logiwa developer reference (122 nodes), logiwa.com,
+  the ecosystem/app-store pages and the public web; found no hosted MCP endpoint, no stdio
+  package on npm or PyPI, and no MCP mention anywhere on Logiwa's own surface. The tools below
+  are a candidate mapping derived from Logiwa's own documented operation names, recorded so the
+  gap is legible. Nothing here is claimed to exist.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: searched
+  note: >-
+    No endpoint URL is invented. Any Logiwa MCP server would have to sit behind the OAuth 2.0
+    password grant documented in authentication/logiwa-authentication.yml, since that is the only
+    credential path Logiwa publishes and it requires a sales-provisioned API user.
+search_evidence:
+- url: https://developer.logiwa.com/
+  http_status: 200
+  finding: No MCP node in the 122-node documentation tree.
+- url: https://www.logiwa.com/llms.txt
+  http_status: 200
+  finding: Served, but a 446-line marketing sitemap. No MCP endpoint, no tool list, no API entry.
+- url: https://www.logiwa.com/ecosystem/app-store
+  http_status: 200
+  finding: Partner/app listings only; no MCP server.
+- registry: npm
+  queries: [logiwa, logiwa-api, logiwa-sdk, '@logiwa/sdk', node-logiwa]
+  finding: All 404 Not found.
+- registry: pypi
+  queries: [logiwa, logiwa-api, python-logiwa]
+  finding: All 404.
+candidate_tools:
+  note: >-
+    DERIVED, NOT SHIPPED. Each entry names a real, documented Logiwa operation. Input schemas are
+    not enumerated because Logiwa publishes no machine-readable contract to read them from — they
+    would have to be transcribed by hand from the per-endpoint HTML reference.
+  count: 12
+  tools:
+  - name: logiwa_lookup_reference_data
+    rest: /en/api/IntegrationApi/LookUp
+    category: reference
+    description: Return Id/Description pairs for 28 static lists — warehouses, depositors, carriers, channels, item types, order statuses, location groups and zones.
+  - name: logiwa_search_products
+    rest: /en/api/IntegrationApi/InventoryItemSearch
+    category: read
+  - name: logiwa_upsert_product
+    rest: /en/api/IntegrationApi/InsertInventoryItem
+    category: write
+  - name: logiwa_search_shipment_orders
+    rest: /en/api/IntegrationApi/WarehouseOrderSearch
+    category: read
+  - name: logiwa_create_shipment_order
+    rest: /en/api/IntegrationApi/InsertShipmentOrder
+    category: write
+  - name: logiwa_cancel_shipment_order
+    rest: /en/api/IntegrationApi/CancelShipmentOrder
+    category: write-reversal
+  - name: logiwa_search_receipt_orders
+    rest: /en/api/IntegrationApi/WarehouseReceiptSearch
+    category: read
+  - name: logiwa_create_receipt_orders
+    rest: /en/api/IntegrationApi/WarehouseReceiptBulkInsert
+    category: write
+  - name: logiwa_search_purchase_orders
+    rest: /en/api/IntegrationApi/PurchaseOrderSearch
+    category: read
+  - name: logiwa_inventory_report
+    rest: /en/api/IntegrationApi/ListingInventoryReport
+    category: read
+  - name: logiwa_available_to_promise
+    rest: /en/api/IntegrationApi/AvailableToPromiseReportSearch
+    category: read
+  - name: logiwa_upload_document
+    rest: /en/api/IntegrationApi/UploadDocument
+    category: write
+agent_readiness_note: >-
+  Even with a server, an agent calling Logiwa would face three published obstacles: outcome is
+  carried in a Success boolean rather than the HTTP status line, there is no idempotency key on
+  any of the 81 POST operations, and quota exhaustion returns 403 with the retry delay embedded
+  in prose rather than a Retry-After header.

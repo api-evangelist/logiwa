@@ -64,5 +64,23 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Logiwa is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://www.nasdaqprivatemarket.com/
+Logiwa is a Chicago-based cloud fulfillment software company. Its flagship product, Logiwa IO, is
+a warehouse management and fulfillment management system (WMS/FMS) for high-volume B2C/DTC brands,
+wholesalers and third-party logistics providers (3PLs).
+
+- Website: https://www.logiwa.com/
+- Developer portal: https://developer.logiwa.com/
+
+## What this profile found (2026-08-25)
+
+- **81 documented operations** in the Logiwa Integration API, all `POST` to
+  `/en/api/IntegrationApi/{Method}` on a per-tenant host — plus an **11-topic webhook catalog**.
+- **No machine-readable contract.** No OpenAPI, AsyncAPI, GraphQL SDL, WSDL or `.proto` is
+  published. See [`openapi/README.md`](openapi/README.md) for the full probe table.
+- **No first-party SDKs** in npm, PyPI, RubyGems, Packagist or NuGet, and no public GitHub org.
+- **Published rate limits** — 60 / 530 / 1200 requests per minute by API user tier — but no
+  `RateLimit-*` or `Retry-After` headers; exhaustion returns `403` with the retry delay in prose.
+- **The API does not use HTTP status codes.** Outcome is a `Success` boolean in the body.
+- **No idempotency key** on any of the 81 POST operations.
+- Served `llms.txt`, a served OIDC discovery document on both API gateway hosts, and a Vanta
+  Trust Center at `trust.logiwa.com`.

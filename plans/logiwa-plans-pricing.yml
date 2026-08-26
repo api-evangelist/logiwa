@@ -1,0 +1,46 @@
+generated: '2026-08-25'
+method: searched
+source: https://www.logiwa.com/pricing
+docs: https://www.logiwa.com/pricing
+name: Logiwa plans and pricing
+description: >-
+  Logiwa publishes NO prices. The pricing page is a quote-request form and states outright that
+  it does not list prices. Separately, the developer documentation names three API user types
+  (Standard, Enterprise, Premium) that carry different published request quotas, but attaches no
+  price to any of them and routes the buyer to a sales representative.
+plan_count: 0
+pricing_model: quote-only
+currency: null
+plans: []
+published_statement: >-
+  "Why doesn't Logiwa list prices on their website? Because a one-size-fits-all price doesn't
+  work for growth-minded 3PLs and brands." Pricing is described as based on fulfillment volume
+  and complexity rather than user count, with unlimited users included.
+api_user_types:
+  note: >-
+    These are the API access tiers Logiwa documents. They are quota tiers, not published plans —
+    no price, currency or billing period is stated for any of them. Recorded here because the
+    quota attached to each is real and published. See rate-limits/logiwa-rate-limits.yml.
+  source: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+  tiers:
+  - name: Standard
+    price: null
+    requests_per_minute: 60
+  - name: Enterprise
+    price: null
+    requests_per_minute: 530
+  - name: Premium
+    price: null
+    requests_per_minute: 1200
+access_gate: >-
+  Getting Started states the integrator must estimate call volume, decide on a user type, contact
+  a sales representative or customer success manager to learn pricing, add API users to the sales
+  contract, and then wait for Logiwa support to provision the users. There is no self-service
+  sign-up for API access.
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://www.logiwa.com/pricing
+    http_status: 200
+  - url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+    http_status: 200

@@ -1,0 +1,131 @@
+generated: '2026-08-25'
+method: searched
+source: >-
+  https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31 plus anonymous probes of
+  https://appapi.logiwa.com/.well-known/openid-configuration and https://trust.logiwa.com
+name: Logiwa standards conformance
+description: >-
+  Cross-cutting standards assertions for the Logiwa Integration API. Logiwa is an RPC-over-POST
+  API that explicitly rejects HTTP status semantics, so most REST-adjacent conformance checks are
+  negative. The OAuth/OIDC surface is real but partially non-conformant.
+conformance:
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document is published. Probed /openapi.json, /openapi.yaml,
+    /swagger.json, /swagger/v1/swagger.json, /v1/openapi.json, /api-docs, /swagger and /redoc on
+    developer.logiwa.com, app.logiwa.com, appapi.logiwa.com, wms.logiwa.com, wmsapi.logiwa.com,
+    dev.logiwa.com and www.logiwa.com. Application hosts 302 to login; API gateway hosts return
+    401 "Token is not valid" on every path; the docs host 404s. See openapi/README.md.
+- id: asyncapi
+  conforms: false
+  evidence: >-
+    Eleven webhook topics are documented with example payloads but no AsyncAPI document is
+    published. /asyncapi.yaml returned 401 on the gateway hosts and 404 on the docs host.
+- id: graphql
+  conforms: false
+  evidence: /graphql 302s to login on application hosts and 401s on gateway hosts. No GraphQL surface is documented.
+- id: grpc
+  conforms: false
+  evidence: No .proto is published on any Logiwa host, and no public Logiwa GitHub organization exists.
+- id: soap-wsdl
+  conforms: false
+  evidence: >-
+    Probed ?wsdl, /service.asmx?wsdl and /en/api/IntegrationApi?wsdl on every host. No WSDL
+    served; gateway hosts 401, application hosts 302/400.
+- id: rest
+  conforms: false
+  evidence: >-
+    Self-declared non-REST. "Logiwa API doesn't use any query or path type of parameters" and
+    "Unlike standard REST APIs, Logiwa API does not use HTTP status codes." Every operation,
+    including reads, is a POST to a verb-named path.
+- id: rfc9457
+  conforms: false
+  evidence: >-
+    Errors are returned as {"Success": false, "Errors": ["free text"]}. No application/problem+json,
+    no type/title/status/detail/instance members. See errors/logiwa-error-codes.yml.
+- id: http-status-semantics
+  conforms: false
+  evidence: >-
+    Business failures return HTTP 200 with Success:false. Throttling returns 403 rather than 429.
+    Token failures return HTTP 200 rather than RFC 6749's required 400.
+- id: oauth2
+  conforms: partial
+  evidence: >-
+    A genuine OAuth 2.0 Resource Owner Password Credentials grant is implemented at
+    https://{env}api.logiwa.com/token and is live (probed 2026-08-25, HTTP 200, returned
+    invalid_grant). Deviations: the password grant is deprecated by OAuth 2.1; error responses
+    return HTTP 200 instead of 400; two different error key shapes are used
+    ("error"/"error_description" vs ".error"/".error_description").
+- id: oidc
+  conforms: partial
+  evidence: >-
+    A real OpenID Connect Discovery document is served anonymously at
+    https://appapi.logiwa.com/.well-known/openid-configuration and
+    https://wmsapi.logiwa.com/.well-known/openid-configuration (both HTTP 200). It advertises
+    /connect/authorize, /connect/token, /connect/userinfo, /connect/introspect, /connect/revocation,
+    /connect/deviceauthorization, PKCE S256, and RS256 id tokens. Two hard deviations: issuer is
+    the literal string "Ocelot" rather than an https URL, which OIDC Discovery 1.0 requires; and
+    every advertised endpoint uses the http:// scheme rather than https://.
+- id: rfc8414
+  conforms: false
+  evidence: >-
+    /.well-known/oauth-authorization-server returned 401 on both gateway hosts. Only the OIDC
+    discovery path is served.
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt returned 404 on www and developer hosts and 401 on the gateway hosts.
+- id: rfc8594-sunset
+  conforms: false
+  evidence: No Sunset or Deprecation header and no deprecation policy is documented.
+- id: pagination
+  conforms: true
+  evidence: >-
+    Documented and consistent across all search and report operations: PageSize (default 200,
+    max 200) and SelectedPageIndex (1-based) in the JSON body; PageCount and RecordCount in the
+    response. https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+- id: idempotency
+  conforms: false
+  evidence: >-
+    No Idempotency-Key header, client request token, or replay-safety guarantee is documented for
+    any of the 81 POST operations. See conventions/logiwa-conventions.yml.
+- id: webhook-signing
+  conforms: false
+  evidence: No HMAC signature, shared secret or origin-verification mechanism is documented for webhook callbacks.
+- id: iso8601-dates
+  conforms: false
+  evidence: >-
+    The Integration API uses MM.DD.YYYY hh:mm:ss pinned to US Pacific Time. Webhook payloads use
+    an ISO-8601-like form (2023-03-30T01:55:55) without an offset, so the two surfaces disagree.
+- id: soc2-type-ii
+  conforms: true
+  evidence: >-
+    Logiwa publishes a "SOC 2 Type II Compliance" claim on its own site
+    (https://www.logiwa.com/solutions/wms-technology-leaders, HTTP 200) and operates a Vanta-backed
+    Trust Center at https://trust.logiwa.com (HTTP 200, CNAME to cname.vantatrust.com). The
+    certification artifacts themselves are behind the Trust Center's request flow.
+  detail: security/logiwa-trust-center.yml
+domain_standard_conformance:
+  declared: false
+  note: >-
+    REWARD-ONLY CHECK, HONESTLY UNMET. Logiwa's market (warehouse management / 3PL fulfillment)
+    has real interchange standards — X12/EDIFACT EDI, GS1 barcode and GTIN identifiers, ASN/856
+    and 940/945 transaction sets. Logiwa's contract declares none of them. The API exposes its own
+    proprietary Logiwa* identifiers (LogiwaOrderId, LogiwaInventoryItemId, LogiwaReceiptOrderId)
+    and its own status vocabularies via the LookUp endpoint, and reaches EDI only indirectly
+    through a third-party partner integration (SPS Commerce) listed in the ecosystem, not through
+    the contract. Nothing is invented to fill this slot.
+  probed_for: [x12, edifact, gs1, gtin, asn-856, oagis, odata, scim]
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://appapi.logiwa.com/.well-known/openid-configuration
+    http_status: 200
+  - url: https://appapi.logiwa.com/swagger.json
+    http_status: 401
+  - url: https://developer.logiwa.com/openapi.json
+    http_status: 404
+  - url: https://trust.logiwa.com
+    http_status: 200
+  - url: https://www.logiwa.com/solutions/wms-technology-leaders
+    http_status: 200

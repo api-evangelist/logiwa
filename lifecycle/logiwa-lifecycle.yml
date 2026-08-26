@@ -1,0 +1,120 @@
+generated: '2026-08-25'
+method: searched
+source: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+name: Logiwa Integration API lifecycle
+description: >-
+  Logiwa publishes no API versioning scheme, no deprecation policy, no dated changelog and no
+  public status page. This artifact records those absences with the probes that established them,
+  alongside the one lifecycle signal Logiwa does publish: an explicit list of operations that are
+  deliberately not exposed through the API.
+versioning:
+  scheme: none-published
+  in_path: false
+  in_header: false
+  current_version: null
+  note: >-
+    The path is /en/api/IntegrationApi/{Method} with no version segment. No version header, media
+    type version or dated version identifier is documented. Breaking changes have no announced
+    vehicle.
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  note: >-
+    No deprecation policy, notice period, Sunset or Deprecation header is documented. No
+    Deprecation pointer is claimed in apis.yml because the provider publishes no such policy.
+change_log:
+  published: false
+  probes:
+  - url: https://www.logiwa.com/changelog
+    status: 404
+  - url: https://www.logiwa.com/release-notes
+    status: 404
+  - url: https://developer.logiwa.com/
+    status: 200
+    note: >-
+      The developer reference has no changelog, release-notes or "what's new" section in its
+      122-node navigation tree.
+  note: >-
+    Release notes appear to live in the Logiwa Knowledge Base at logiwa.my.site.com, which is a
+    Salesforce Experience Cloud community. It returned HTTP 503 on probe and is not a dated,
+    publicly readable API changelog.
+status_page:
+  published: false
+  probes:
+  - url: https://status.logiwa.com
+    status: 000
+    note: DNS does not resolve.
+  - url: https://status.logiwa.io
+    status: 000
+    note: DNS does not resolve.
+  - url: https://logiwa.instatus.com
+    status: 200
+    note: >-
+      REJECTED as a false positive. Instatus answers this subdomain by 302-redirecting to
+      https://instatus.com/, the vendor's own marketing homepage. There is no Logiwa status page
+      behind it.
+  - url: https://logiwa.statuspage.io
+    status: 200
+    note: >-
+      REJECTED as a false positive. Redirects to atlassian.com/software/statuspage, the vendor
+      product page.
+  note: >-
+    No StatusPage pointer is claimed in apis.yml. Logiwa markets "up to 100% uptime" on its
+    solutions pages but publishes no incident history, no uptime dashboard and no subscribable
+    status feed.
+sla:
+  published: false
+  note: >-
+    No SLA document is linked from https://www.logiwa.com/legal, which links only a Privacy Policy.
+    An uptime claim on a marketing page is not an SLA.
+support:
+  channels:
+  - name: Logiwa Help Center (Knowledge Base)
+    url: https://logiwa.my.site.com/logiwahelp/s/
+    status: 503
+    gated: true
+    note: >-
+      Salesforce Experience Cloud community. Referenced from the developer reference sidebar as
+      "Knowledge Base". Returned 503 on probe 2026-08-25.
+  - name: Contact us
+    url: https://www.logiwa.com/contact-us
+    status: 200
+  - name: help.logiwa.com portal
+    url: https://help.logiwa.com/
+    status: 200
+    gated: true
+    note: 302s to a HubSpot member login (/_hcms/mem/login) — customer-only.
+  api_support_model: >-
+    API users are provisioned by a customer success manager under a sales contract; the docs
+    direct integrators to their CSM or sales representative for access and to customer support
+    for opaque error log ids.
+api_maturity:
+  stability: production
+  first_documented: >-
+    The developer reference's own content ids are MongoDB ObjectIds whose embedded timestamps run
+    from December 2019 to February 2025, indicating continuous documentation maintenance over
+    roughly five years.
+  operations_documented: 81
+  unavailable_via_api:
+    note: >-
+      Logiwa publishes an explicit scope boundary — capabilities the API deliberately does not
+      cover. This is a real lifecycle signal and unusually candid.
+    operations: [Creating carrier labels, Allocation, Task creation, Packing, Job creation, Transfer, Picking]
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://www.logiwa.com/changelog
+    http_status: 404
+  - url: https://www.logiwa.com/release-notes
+    http_status: 404
+  - url: https://status.logiwa.com
+    http_status: 000
+  - url: https://logiwa.instatus.com
+    http_status: 200
+  - url: https://logiwa.my.site.com/logiwahelp/s/
+    http_status: 503
+  - url: https://www.logiwa.com/legal
+    http_status: 200

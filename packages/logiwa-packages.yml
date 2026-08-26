@@ -1,0 +1,66 @@
+generated: '2026-08-25'
+method: searched
+source: >-
+  Unauthenticated registry metadata queries against registry.npmjs.org, pypi.org, rubygems.org,
+  packagist.org and the GitHub search API, plus the Logiwa developer reference.
+name: Logiwa client libraries and SDKs
+description: >-
+  Logiwa publishes NO first-party client libraries or SDKs in any public package registry, and
+  operates no public GitHub organization. The developer reference contains no SDK, code-sample or
+  client-library section — integrators are expected to call the JSON endpoints directly.
+package_count: 0
+official_package_count: 0
+packages: []
+registries_searched:
+- registry: npm
+  endpoint: https://registry.npmjs.org/{pkg}
+  queries: [logiwa, logiwa-api, logiwa-sdk, '@logiwa/sdk', node-logiwa]
+  result: '{"error":"Not found"} for every query'
+  version: null
+  published: null
+- registry: pypi
+  endpoint: https://pypi.org/pypi/{pkg}/json
+  queries: [logiwa, logiwa-api, python-logiwa]
+  result: HTTP 404 for every query
+  version: null
+  published: null
+- registry: rubygems
+  endpoint: https://rubygems.org/api/v1/gems/logiwa.json
+  result: HTTP 404
+  version: null
+  published: null
+- registry: packagist
+  endpoint: https://packagist.org/packages/logiwa/logiwa.json
+  result: HTTP 404
+  version: null
+  published: null
+- registry: nuget
+  queries: [Logiwa]
+  result: >-
+    No first-party Logiwa package. The only .NET client found is the third-party
+    PrimePenguin/LogiwaSharp repository (0 stars, last pushed 2024-07-16), which is not published
+    by Logiwa.
+  version: null
+  published: null
+github:
+  organization: null
+  note: >-
+    No github.com/logiwa organization is linked from logiwa.com or from the developer reference.
+    A GitHub repository search for "logiwa" returns 70 results, all third-party — hiring-exercise
+    repositories ("LogiwaCase", "LogiwaCodeChallenge", "LogiwaProject"), a community C# wrapper
+    (PrimePenguin/LogiwaSharp), and unrelated projects. None is published by Logiwa.
+  searched: https://api.github.com/search/repositories?q=logiwa
+findings:
+- id: no-first-party-sdk
+  severity: medium
+  detail: >-
+    Zero official SDKs across six registries for an API with 81 documented operations. Every
+    integrator hand-rolls an HTTP client, and must hand-roll the non-standard error handling
+    (Success boolean instead of HTTP status) too. No SDKs pointer is claimed in apis.yml.
+- id: no-public-repos
+  severity: low
+  detail: >-
+    No public GitHub organization means no reference implementations, no issue tracker for
+    integrators, and no community-visible changelog.
+x-evidence:
+  fetched: '2026-08-25'

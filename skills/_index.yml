@@ -1,0 +1,41 @@
+generated: '2026-08-25'
+method: generated
+source: >-
+  Generated from the Logiwa developer reference at https://developer.logiwa.com/ (81 documented
+  operations, harvested 2026-08-25) plus this repo's conventions/, errors/, authentication/ and
+  rate-limits/ artifacts.
+name: Logiwa Agent Skills
+description: >-
+  Packaged operating instructions for the marquee Logiwa Integration API flows. GROUNDING NOTE:
+  Logiwa publishes no OpenAPI, so there are no operationIds to grep. Every operation named in
+  these skills is a real Logiwa method path transcribed verbatim from Logiwa's own endpoint
+  documentation and cross-checked against the harvested reference; no operation is invented.
+  Request and response field detail is deliberately NOT enumerated, because Logiwa publishes no
+  machine-readable schema and guessing field names would be fabrication.
+provider_published_skills: false
+provider_published_skills_note: >-
+  Searched for a provider-published AGENTS.md, skills/ directory or agent instruction file on
+  logiwa.com and developer.logiwa.com. None found.
+skills:
+- file: logiwa-carrier-partner-integration.md
+  name: logiwa-carrier-partner-integration
+  api: Logiwa Integration API
+  description: >-
+    Integrate a third-party carrier or TMS with Logiwa — pull orders and item detail, run rate
+    shopping and label selection externally, and return the label image and tracking number.
+    Follows the four-step flow Logiwa itself publishes.
+  operations: [WarehouseOrderSearch, InventoryItemSearch, UploadDocument]
+- file: logiwa-order-intake-and-fulfillment.md
+  name: logiwa-order-intake-and-fulfillment
+  api: Logiwa Integration API
+  description: >-
+    Push shipment orders into Logiwa from an OMS or storefront, track them to shipment, and
+    cancel them while cancellation is still possible.
+  operations: [LookUp, InsertShipmentOrder, InsertShipmentOrderWithBulkResult, WarehouseOrderSearch, WarehouseOrderStatusReportSearch, CancelShipmentOrder]
+- file: logiwa-inventory-sync.md
+  name: logiwa-inventory-sync
+  api: Logiwa Integration API
+  description: >-
+    Keep an external system's stock levels aligned with Logiwa using the inventory reports,
+    available-to-promise, and the Inventory Change webhook.
+  operations: [LookUp, ListingInventoryReport, GetAvailableStockInfo, AvailableToPromiseReportSearch, InventoryAdjustment]

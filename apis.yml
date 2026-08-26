@@ -1,18 +1,105 @@
 aid: logiwa
 name: Logiwa
-description: 'Logiwa is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Logiwa is a Chicago-based cloud fulfillment software company whose flagship product, Logiwa IO,
+  is a warehouse management and fulfillment management system (WMS/FMS) built for high-volume
+  B2C and DTC brands, wholesalers and third-party logistics providers (3PLs). Logiwa exposes a
+  documented Integration API covering products, shipment orders, purchase orders, receipt orders,
+  inventory, locations, count plans, documents, warehouse tasks, transaction history and 3PL
+  billing, plus an eleven-topic webhook surface for order, inventory, movement and shipment
+  tracking events. The API is an RPC-over-POST design: 81 documented operations, all reached by
+  POST to /en/api/IntegrationApi/{Method} on a per-tenant host, authenticated with an OAuth 2.0
+  password grant that yields a bearer token. Logiwa publishes no OpenAPI, AsyncAPI or other
+  machine-readable contract, and no first-party SDKs; the reference is a JavaScript-rendered
+  developer portal and API credentials are provisioned by sales rather than self-service.
+image: https://developer.logiwa.com/Content/img/logiwa_new_logo.png
 url: https://raw.githubusercontent.com/api-evangelist/logiwa/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-08-25'
 modified: '2026-08-25'
 tags:
 - Company
-apis: []
+- Warehouse Management
+- Fulfillment
+- Logistics
+- Supply Chain
+- Inventory Management
+- Order Management
+- Third Party Logistics
+- Ecommerce
+- Shipping
+- Webhooks
+- SaaS
+apis:
+- name: Logiwa Integration API
+  description: >-
+    The Logiwa Integration API is an RPC-over-HTTP interface with 81 documented operations
+    covering products and kits, shipment orders and order details, purchase orders, receipt
+    orders and receiving, inventory reporting and adjustment, available-to-promise, locations
+    and pallets, count plans, documents, warehouse tasks and productivity, transaction history,
+    and 3PL contract billing. Every operation is a POST that carries its filters in the JSON
+    body; there are no path or query parameters. Outcome is signalled by a Success boolean in
+    the response body rather than by HTTP status codes.
+  humanURL: https://developer.logiwa.com/
+  baseURL: https://app.logiwa.com/en/api/IntegrationApi
+  tags:
+  - Warehouse Management
+  - Fulfillment
+  - Inventory Management
+  - Order Management
+  - Logistics
+  properties:
+  - type: Documentation
+    url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+  - type: APIReference
+    url: https://developer.logiwa.com/
+  - type: GettingStarted
+    url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+  - type: Authentication
+    url: authentication/logiwa-authentication.yml
+  - type: OAuthScopes
+    url: scopes/logiwa-scopes.yml
+  - type: Conventions
+    url: conventions/logiwa-conventions.yml
+  - type: ErrorCatalog
+    url: errors/logiwa-error-codes.yml
+  - type: RateLimits
+    url: rate-limits/logiwa-rate-limits.yml
+  - type: DataModel
+    url: data-model/logiwa-data-model.yml
+  - type: Conformance
+    url: conformance/logiwa-conformance.yml
+  - type: Lifecycle
+    url: lifecycle/logiwa-lifecycle.yml
+  x-base-url-note: >-
+    The API host is per-tenant. The documented pattern is https://{environment}.logiwa.com with
+    the Integration API mounted at /en/api/IntegrationApi, and the matching token host at
+    https://{environment}api.logiwa.com/token. app.logiwa.com (paired with appapi.logiwa.com) and
+    wms.logiwa.com (paired with wmsapi.logiwa.com) are the two environments Logiwa names in its
+    own Login documentation; app.logiwa.com is recorded here as the concrete production base and
+    was confirmed live on 2026-08-25 (POST /en/api/IntegrationApi/LookUp returned HTTP 401 with
+    the documented authorization envelope).
+- name: Logiwa Webhooks
+  description: >-
+    Logiwa's outbound event surface. Eleven documented topics deliver order status, receipt and
+    purchase order status, inventory change, location update, movement, receipt, shipment
+    tracking and consolidated shipment events to a customer-configured callback URL. Subscriptions
+    are configured in the Logiwa WMS UI, not through the API. Logiwa states delivery is not
+    guaranteed and ordering is not guaranteed across topics, and publishes no callback signing
+    mechanism.
+  humanURL: https://developer.logiwa.com/?id=633d97bae6466c1730066501
+  baseURL: https://developer.logiwa.com/?id=633d97bae6466c1730066501
+  tags:
+  - Webhooks
+  - Events
+  - Fulfillment
+  properties:
+  - type: Webhooks
+    url: asyncapi/logiwa-webhooks.yml
+  - type: Documentation
+    url: https://developer.logiwa.com/?id=633d97bae6466c1730066501
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -20,4 +107,72 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://www.nasdaqprivatemarket.com/
+  url: https://www.logiwa.com/
+- type: DeveloperPortal
+  url: https://developer.logiwa.com/
+- type: Documentation
+  url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+- type: APIReference
+  url: https://developer.logiwa.com/
+- type: GettingStarted
+  url: https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31
+- type: Blog
+  url: https://www.logiwa.com/blog
+- type: Support
+  url: https://www.logiwa.com/contact-us
+- type: Pricing
+  url: https://www.logiwa.com/pricing
+- type: PrivacyPolicy
+  url: https://www.logiwa.com/privacy-policy
+- type: Authentication
+  url: authentication/logiwa-authentication.yml
+- type: OAuthScopes
+  url: scopes/logiwa-scopes.yml
+- type: Conventions
+  url: conventions/logiwa-conventions.yml
+- type: ErrorCatalog
+  url: errors/logiwa-error-codes.yml
+- type: RateLimits
+  url: rate-limits/logiwa-rate-limits.yml
+- type: Plans
+  url: plans/logiwa-plans-pricing.yml
+- type: Lifecycle
+  url: lifecycle/logiwa-lifecycle.yml
+- type: Conformance
+  url: conformance/logiwa-conformance.yml
+- type: Compliance
+  url: security/logiwa-trust-center.yml
+- type: TrustCenter
+  url: security/logiwa-trust-center.yml
+- type: DomainSecurity
+  url: security/logiwa-domain-security.yml
+- type: DataModel
+  url: data-model/logiwa-data-model.yml
+- type: Packages
+  url: packages/logiwa-packages.yml
+- type: Webhooks
+  url: asyncapi/logiwa-webhooks.yml
+- type: WellKnown
+  url: well-known/logiwa-well-known.yml
+- type: LLMsTxt
+  url: llms/logiwa-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+x-enrichment:
+  date: '2026-08-25'
+  status: enriched
+  artifacts_added: 24
+  pass: local-v1
+x-contract:
+  machine_readable_spec: false
+  detail: >-
+    Logiwa publishes 81 fully documented operations plus 11 webhook topics at
+    https://developer.logiwa.com/, but no OpenAPI, Swagger, AsyncAPI, GraphQL SDL, WSDL or
+    .proto. Probed 12 spec paths across 7 hosts on 2026-08-25 — docs host 404s, application
+    hosts 302 to login, API gateway hosts blanket-401. See openapi/README.md for the full probe
+    table.
+  docs_readable: true
+  docs_note: >-
+    The developer portal is an AngularJS SPA whose content is served by two of Logiwa's own
+    public POST endpoints (/api/Menu/GetMenuList and /api/EndPointApi/GetEndPointDetail). All
+    derived artifacts in this repository were read from that anonymous public surface.

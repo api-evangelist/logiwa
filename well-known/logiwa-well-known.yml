@@ -1,0 +1,129 @@
+generated: '2026-08-25'
+method: probed
+source: Direct anonymous HTTP probes of /.well-known/* on every Logiwa host named in the
+  developer documentation (developer.logiwa.com, app.logiwa.com, appapi.logiwa.com, www.logiwa.com).
+name: Logiwa well-known documents
+description: >-
+  Two Logiwa API gateway hosts serve a real RFC 8414 / OpenID Connect discovery document at
+  /.well-known/openid-configuration. Everything else probed returns 404, an authentication
+  challenge, or an HTML single-page-app shell. The application hosts (app.logiwa.com) answer
+  200 with an AngularJS shell for every /.well-known/* path, which is a catch-all route and
+  NOT a served document — those are recorded as misses.
+hosts:
+- host: appapi.logiwa.com
+  note: >-
+    The Logiwa API gateway / token host for the app.logiwa.com environment. Documented at
+    https://developer.logiwa.com/?id=5df0da39e6466c2eec992f3f ("app.logiwa.com = appapi.logiwa.com/token").
+    This host returns 401 "Token is not valid" for nearly every path, so the anonymous 200 on
+    openid-configuration is a deliberately published document, not a catch-all.
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: logiwa-appapi-openid-configuration.json
+    content_type: application/json
+    note: >-
+      Real OIDC discovery document. issuer "Ocelot" (the .NET API-gateway product name, not an
+      https issuer URL) and every advertised endpoint uses the http:// scheme rather than https://.
+  - path: /.well-known/oauth-authorization-server
+    status: 401
+    file: null
+  - path: /.well-known/security.txt
+    status: 401
+    file: null
+  - path: /.well-known/api-catalog
+    status: 401
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 401
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 401
+    file: null
+  - path: /.well-known/agent.json
+    status: 401
+    file: null
+- host: wmsapi.logiwa.com
+  note: >-
+    The API gateway / token host for the wms.logiwa.com environment, documented on the same
+    Login page. Serves an identical discovery document with its own host substituted.
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: logiwa-wmsapi-openid-configuration.json
+    content_type: application/json
+  - path: /.well-known/oauth-authorization-server
+    status: 401
+    file: null
+  - path: /.well-known/security.txt
+    status: 401
+    file: null
+  - path: /.well-known/api-catalog
+    status: 401
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 401
+    file: null
+  - path: /.well-known/agent.json
+    status: 401
+    file: null
+- host: www.logiwa.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+- host: developer.logiwa.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+- host: app.logiwa.com
+  note: >-
+    SPA catch-all. openid-configuration, oauth-authorization-server and api-catalog all answered
+    200 with an identical AngularJS HTML shell (<!DOCTYPE html><html ng-app="">). Treated as
+    MISSES, not documents — no pointer is claimed on their behalf.
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: null
+    note: HTML SPA shell, not a document.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: HTML SPA shell, not a document.
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: HTML SPA shell, not a document.
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+security_txt: false
+api_catalog: false
+agent_card: false

@@ -1,0 +1,48 @@
+generated: '2026-08-25'
+method: probed
+source: https://appapi.logiwa.com/.well-known/openid-configuration
+name: Logiwa OAuth scopes
+description: >-
+  The Logiwa API gateway advertises three OAuth scopes in its anonymously-served OIDC discovery
+  document. NONE of them is documented anywhere in the Logiwa developer reference, and the only
+  documented authentication flow — the password grant against /token — does not take a scope
+  parameter. Authorization on the Integration API is carried by the provisioned user's Roles,
+  Warehouses and Clients, not by token scopes.
+scope_count: 3
+scopes:
+- name: admin
+  description: null
+  documented_by_provider: false
+  note: >-
+    Advertised in scopes_supported. No description, no grant path and no reference page exists
+    for it in the public documentation. Description is left null rather than guessed.
+- name: openid
+  description: Standard OpenID Connect scope requesting an ID token.
+  documented_by_provider: false
+- name: offline_access
+  description: Standard OAuth 2.0 scope requesting a refresh token.
+  documented_by_provider: false
+  note: Appears twice in the served scopes_supported array — a duplicate in Logiwa's own document.
+documented_authorization_model: >-
+  "The data this API user can access is based on the permissions given to them in Logiwa, such as
+  the Roles, Warehouses, and Clients they're affiliated with."
+  — https://developer.logiwa.com/?id=5df0da39e6466c2eec992f3f
+findings:
+- id: scopes-not-documented
+  severity: medium
+  detail: >-
+    The gateway advertises an "admin" scope with no published definition and no documented way to
+    request it. An integrator has no way to know what it grants or to scope a credential down.
+- id: no-least-privilege-path
+  severity: medium
+  detail: >-
+    Because the documented flow is a password grant with no scope parameter, every integration
+    token carries the full permission set of the human user account behind it. There is no
+    published way to issue a read-only or warehouse-limited API credential.
+x-evidence:
+  fetched: '2026-08-25'
+  probes:
+  - url: https://appapi.logiwa.com/.well-known/openid-configuration
+    http_status: 200
+  - url: https://wmsapi.logiwa.com/.well-known/openid-configuration
+    http_status: 200
