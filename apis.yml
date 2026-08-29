@@ -12,6 +12,17 @@ description: >-
   password grant that yields a bearer token. Logiwa publishes no OpenAPI, AsyncAPI or other
   machine-readable contract, and no first-party SDKs; the reference is a JavaScript-rendered
   developer portal and API credentials are provisioned by sales rather than self-service.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://developer.logiwa.com/Content/img/logiwa_new_logo.png
 url: https://raw.githubusercontent.com/api-evangelist/logiwa/refs/heads/main/apis.yml
 x-type: company
