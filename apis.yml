@@ -39,6 +39,19 @@ tags:
 - Inventory Management
 - Order Management
 - Third Party Logistics
+- E-Commerce
+- Shipping
+- Webhook
+- Software-as-a-Service
+tags_raw:
+- Company
+- Warehouse Management
+- Fulfillment
+- Logistics
+- Supply Chain
+- Inventory Management
+- Order Management
+- Third Party Logistics
 - Ecommerce
 - Shipping
 - Webhooks
@@ -103,6 +116,10 @@ apis:
   humanURL: https://developer.logiwa.com/?id=633d97bae6466c1730066501
   baseURL: https://developer.logiwa.com/?id=633d97bae6466c1730066501
   tags:
+  - Webhook
+  - Event
+  - Fulfillment
+  tags_raw:
   - Webhooks
   - Events
   - Fulfillment
