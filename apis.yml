@@ -51,7 +51,7 @@ tags:
 - Fulfillment
 - Logistics
 - Supply Chain
-- Inventory Management
+- Inventory
 - Order Management
 - Third Party Logistics
 - E-Commerce
@@ -84,6 +84,12 @@ apis:
   humanURL: https://developer.logiwa.com/
   baseURL: https://app.logiwa.com/en/api/IntegrationApi
   tags:
+  - Warehouse Management
+  - Fulfillment
+  - Inventory
+  - Order Management
+  - Logistics
+  tags_raw:
   - Warehouse Management
   - Fulfillment
   - Inventory Management
