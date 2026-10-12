@@ -1,0 +1,16 @@
+generated: '2026-10-12'
+method: none
+source:
+- https://zapier.com/apps/logiwa/integrations
+- https://n8n.io/integrations/logiwa/
+- https://composio.dev/toolkits/logiwa
+- https://monid.ai/tools/logiwa
+checked:
+- https://composio.dev/toolkits/logiwa
+- https://monid.ai/tools/logiwa
+- https://n8n.io/integrations/logiwa/
+- https://zapier.com/apps/logiwa/integrations
+summary: null
+marketplace_apps: []
+edges: []
+templates: []
