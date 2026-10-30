@@ -64,23 +64,126 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Logiwa is a Chicago-based cloud fulfillment software company. Its flagship product, Logiwa IO, is
-a warehouse management and fulfillment management system (WMS/FMS) for high-volume B2C/DTC brands,
-wholesalers and third-party logistics providers (3PLs).
+Logiwa is a Chicago-based cloud fulfillment software company whose flagship product, Logiwa IO, is a warehouse management and fulfillment management system (WMS/FMS) built for high-volume B2C and DTC brands, wholesalers and third-party logistics providers (3PLs). Logiwa exposes a documented Integration API covering products, shipment orders, purchase orders, receipt orders, inventory, locations, count plans, documents, warehouse tasks, transaction history and 3PL billing, plus an eleven-topic webhook surface for order, inventory, movement and shipment tracking events. The API is an RPC-over-POST design: 81 documented operations, all reached by POST to /en/api/IntegrationApi/{Method} on a per-tenant host, authenticated with an OAuth 2.0 password grant that yields a bearer token. Logiwa publishes no OpenAPI, AsyncAPI or other machine-readable contract, and no first-party SDKs; the reference is a JavaScript-rendered developer portal and API credentials are provisioned by sales rather than self-service.
 
-- Website: https://www.logiwa.com/
-- Developer portal: https://developer.logiwa.com/
+**Areas:** Company · Warehouse Management · Fulfillment · Logistics · Supply Chain · Inventory · Order Management · Third Party Logistics · E-Commerce · Shipping · Webhook · Software-as-a-Service
 
-## What this profile found (2026-08-25)
+## Logiwa on APIs.io
 
-- **81 documented operations** in the Logiwa Integration API, all `POST` to
-  `/en/api/IntegrationApi/{Method}` on a per-tenant host — plus an **11-topic webhook catalog**.
-- **No machine-readable contract.** No OpenAPI, AsyncAPI, GraphQL SDL, WSDL or `.proto` is
-  published. See [`openapi/README.md`](openapi/README.md) for the full probe table.
-- **No first-party SDKs** in npm, PyPI, RubyGems, Packagist or NuGet, and no public GitHub org.
-- **Published rate limits** — 60 / 530 / 1200 requests per minute by API user tier — but no
-  `RateLimit-*` or `Retry-After` headers; exhaustion returns `403` with the retry delay in prose.
-- **The API does not use HTTP status codes.** Outcome is a `Success` boolean in the body.
-- **No idempotency key** on any of the 81 POST operations.
-- Served `llms.txt`, a served OIDC discovery document on both API gateway hosts, and a Vanta
-  Trust Center at `trust.logiwa.com`.
+Everything profiled for Logiwa is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/logiwa/](https://apis.io/providers/logiwa/)** — or go straight to one of the APIs or properties below.
+
+### APIs (2)
+
+- [Logiwa Integration API](https://apis.io/apis/logiwa/logiwa-integration-api/) — The Logiwa Integration API is an RPC-over-HTTP interface with 81 documented operations covering products and kits, shipment orders and order details,…
+- [Logiwa Webhooks](https://apis.io/apis/logiwa/logiwa-webhooks/) — Logiwa's outbound event surface. Eleven documented topics deliver order status, receipt and purchase order status, inventory change, location update,…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Logiwa Webhooks](https://apis.io/asyncapis/logiwa/logiwa-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [Logiwa MCP server](https://apis.io/servers/logiwa/logiwa-mcp-server/)
+
+#### Security (4)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Logiwa Authentication](https://apis.io/security/logiwa/logiwa-authentication/)
+- [Logiwa Domain Security](https://apis.io/security/logiwa/logiwa-domain-security/)
+- [Logiwa Trust Center](https://apis.io/security/logiwa/logiwa-trust-center/)
+- [Logiwa Vulnerability Disclosure](https://apis.io/security/logiwa/logiwa-vulnerability-disclosure/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Logiwa Scopes](https://apis.io/scopes/logiwa/logiwa-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Logiwa Plans Pricing](https://apis.io/plans/logiwa/logiwa-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Logiwa Rate Limits](https://apis.io/rate-limits/logiwa/logiwa-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.logiwa.com/)
+- [Documentation](https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31)
+- [Getting started](https://developer.logiwa.com/?id=5df0d8bfe6466c2eec992f31)
+- [API reference](https://developer.logiwa.com/)
+- [Pricing](https://www.logiwa.com/pricing)
+- [Support](https://www.logiwa.com/contact-us)
+- [Blog](https://www.logiwa.com/blog)
+- [Privacy policy](https://www.logiwa.com/privacy-policy)
+
+## API Evangelist rating
+
+**Kin Score 46.6** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 39.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 39.5 |
+| Developer ergonomics | 58.9 |
+| Access clarity | 36.8 |
+
+**Agent readiness 34.4** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 35.3** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/logiwa/](https://apis.io/providers/logiwa/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Logiwa: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/logiwa/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
